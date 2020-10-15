@@ -19,6 +19,8 @@ args = parser.parse_args()
 n_working_threads = 0
 n_downloaded = 0
 threads = []
+N = None
+errors = 0
 
 
 class Logger(object):
@@ -58,6 +60,9 @@ def downloader(i, video_name, n):
         n_downloaded += 1
         logging.info(f'{video_name} downloaded ({n_downloaded}/{n})')
     except Exception as e:
+        global N, errors
+        N -= 1
+        errors += 1
         logging.info(e)
 
     n_working_threads -= 1
@@ -77,12 +82,15 @@ def main():
     logging.info(f'Started downloading with {args.n_threads} threads')
     data = pd.read_csv(args.csv_path)
 
+    global N
+    N = data.shape[0]
+
     for i, row in data.iterrows():
         video_name = row.YouTube_ID
-        start_thread(i, video_name, data.shape[0])
+        start_thread(i, video_name, N)
 
     thread_cleanup()
-    logging.info(f'Downloaded {n_downloaded} files')
+    logging.info(f'Downloaded {n_downloaded} files, errors: {errors}')
 
 
 if __name__ == '__main__':
