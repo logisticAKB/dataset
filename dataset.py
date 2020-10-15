@@ -40,8 +40,8 @@ def thread_cleanup():
             t.join()
 
 
-def downloader(i, video_name, n):
-    global n_working_threads
+def downloader(i, video_name):
+    global n_working_threads, N
     n_working_threads += 1
 
     try:
@@ -58,9 +58,9 @@ def downloader(i, video_name, n):
 
         global n_downloaded
         n_downloaded += 1
-        logging.info(f'{video_name} downloaded ({n_downloaded}/{n})')
+        logging.info(f'{video_name} downloaded ({n_downloaded}/{N})')
     except Exception as e:
-        global N, errors
+        global errors
         N -= 1
         errors += 1
         logging.info(e)
@@ -68,12 +68,12 @@ def downloader(i, video_name, n):
     n_working_threads -= 1
 
 
-def start_thread(i, video_name, n):
+def start_thread(i, video_name):
     global n_working_threads
     while n_working_threads >= args.n_threads:
         pass
     logging.info(f'Downloading {video_name}')
-    t = threading.Thread(target=downloader, args=(i, video_name, n), daemon=True)
+    t = threading.Thread(target=downloader, args=(i, video_name), daemon=True)
     threads.append(t)
     t.start()
 
@@ -87,7 +87,7 @@ def main():
 
     for i, row in data.iterrows():
         video_name = row.YouTube_ID
-        start_thread(i, video_name, N)
+        start_thread(i, video_name)
 
     thread_cleanup()
     logging.info(f'Downloaded {n_downloaded} files, errors: {errors}')
