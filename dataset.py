@@ -53,12 +53,14 @@ def downloader(i, video_name):
             'logger': Logger(),
             'outtmpl': os.path.join(args.work_path, video_name),
         }
+        t1 = time.time()
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             ydl.download([f'https://www.youtube.com/watch?v={video_name}'])
 
         global n_downloaded
         n_downloaded += 1
-        logging.info(f'{video_name} downloaded ({n_downloaded}/{N})')
+        t2 = time.time()
+        logging.info(f'{video_name} downloaded in {int(t2 - t1)}s ({n_downloaded}/{N})')
     except Exception as e:
         global errors
         N -= 1
